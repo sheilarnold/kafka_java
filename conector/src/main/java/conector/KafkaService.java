@@ -1,7 +1,6 @@
 package conector;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -9,28 +8,34 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
-public class Log {
+public class KafkaService {
 
-    public static void main(String[] args) throws InterruptedException {
+    private final KafkaConsumer<String, String> consumer;
+    private final ConsumerFunction parse;
 
-        var log = new Log();
-        var kfkService = new KafkaService("novo_pedido", log::parse);
-        kfkService.run();
+    public KafkaService(String topic, ConsumerFunction parse) throws InterruptedException {
+        this.consumer = new KafkaConsumer<String, String>(properties());
+        consumer.subscribe(Collections.singletonList(topic));
 
-        var consumer = new KafkaConsumer<String, String>(properties());
-        consumer.subscribe(Pattern.compile(".*"));//.* determina que todos os tópicos serão observados
+        while (true){
+            var registros = consumer.poll(Duration.ofMillis(100));
+            if(!registros.isEmpty()){
+                System.out.println("Encontramos " + registros.count() + " registro(s)");
 
+                for (var registro : registros){
+                    parse.consume(registro);
+
+                    Thread.sleep(5000);
+                }
+
+            }
+
+        }
     }
 
-    private void parse(ConsumerRecord<String, String> registro){
-        System.out.println("-----------------LOG-----------------------");
-        System.out.println("Tópico: " + registro.topic());
-        System.out.println("Chave: " + registro.key());
-        System.out.println("Valor: " + registro.value());
-        System.out.println("Partição: " + registro.partition());
-        System.out.println("OffSet: " + registro.offset());
+    public void run(){
+
     }
 
     private static Properties properties(){
