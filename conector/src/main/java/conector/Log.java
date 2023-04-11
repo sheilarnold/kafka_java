@@ -6,8 +6,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -16,7 +14,7 @@ public class Log {
     public static void main(String[] args) throws InterruptedException {
 
         var log = new Log();
-        var kfkService = new KafkaService("novo_pedido", log::parse);
+        var kfkService = new KafkaService(Log.class.getSimpleName(),"novo_pedido", log::parse);
         kfkService.run();
 
         var consumer = new KafkaConsumer<String, String>(properties());

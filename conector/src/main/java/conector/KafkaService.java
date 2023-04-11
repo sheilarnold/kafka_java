@@ -14,8 +14,8 @@ public class KafkaService {
     private final KafkaConsumer<String, String> consumer;
     private final ConsumerFunction parse;
 
-    public KafkaService(String topic, ConsumerFunction parse) throws InterruptedException {
-        this.consumer = new KafkaConsumer<String, String>(properties());
+    public KafkaService(String groupId, String topic, ConsumerFunction parse) throws InterruptedException {
+        this.consumer = new KafkaConsumer<String, String>(properties(groupId));
         consumer.subscribe(Collections.singletonList(topic));
 
         while (true){
@@ -38,12 +38,12 @@ public class KafkaService {
 
     }
 
-    private static Properties properties(){
+    private static Properties properties(String groupId){
         var properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.17.0.1:29092");
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, Log.class.getSimpleName());
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "1");//Determina que irá receber as mensagens uma vez apenas, de um em um registro
         return properties;
     }
