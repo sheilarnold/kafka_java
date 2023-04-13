@@ -5,19 +5,34 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
-public class KafkaService {
+public class KafkaService implements Closeable {
 
     private final KafkaConsumer<String, String> consumer;
     private final ConsumerFunction parse;
 
-    public KafkaService(String groupId, String topic, ConsumerFunction parse) throws InterruptedException {
-        this.consumer = new KafkaConsumer<String, String>(properties(groupId));
+    public KafkaService(String groupId, String topic, ConsumerFunction parse) {
+        this(parse, groupId);
         consumer.subscribe(Collections.singletonList(topic));
+    }
 
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction parse) {
+        this(parse, groupId);
+        consumer.subscribe(topic);
+    }
+
+    private KafkaService(ConsumerFunction parse, String groupId) {
+        this.parse = parse;
+        this.consumer = new KafkaConsumer<>(properties(groupId));
+    }
+
+    void run(){
         while (true){
             var registros = consumer.poll(Duration.ofMillis(100));
             if(!registros.isEmpty()){
@@ -25,17 +40,11 @@ public class KafkaService {
 
                 for (var registro : registros){
                     parse.consume(registro);
-
-                    Thread.sleep(5000);
                 }
 
             }
 
         }
-    }
-
-    public void run(){
-
     }
 
     private static Properties properties(String groupId){
@@ -48,4 +57,8 @@ public class KafkaService {
         return properties;
     }
 
+    @Override
+    public void close() throws IOException {
+        consumer.close();
+    }
 }
