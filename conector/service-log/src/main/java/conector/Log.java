@@ -13,12 +13,12 @@ public class Log {
 
     public static void main(String[] args) throws InterruptedException {
 
+        var consumer = new KafkaConsumer<String, String>(properties());
+        consumer.subscribe(Pattern.compile(".*"));//.* determina que todos os tópicos serão observados
+
         var log = new Log();
         var kfkService = new KafkaService(Log.class.getSimpleName(),"novo_pedido", log::parse);
         kfkService.run();
-
-        var consumer = new KafkaConsumer<String, String>(properties());
-        consumer.subscribe(Pattern.compile(".*"));//.* determina que todos os tópicos serão observados
 
     }
 

@@ -1,0 +1,127 @@
+package conector;
+
+import org.apache.kafka.clients.producer.Callback;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+public class KafkaProducerService<P> implements Closeable {
+
+    private final KafkaProducer<String, P> producer;
+    KafkaProducerService(){
+        this.producer = new KafkaProducer<>(properties());
+    }
+
+    public void send(String topic, String key, P value) throws ExecutionException, InterruptedException {
+        var record = new ProducerRecord<>(topic, key, value);
+
+        Callback callback = (data, ex) -> {
+            if(ex != null){
+                ex.printStackTrace();
+                return;
+            }
+            System.out.println(data.topic() + " :: " + data.partition() + "/" + data.offset() + "/" + data.timestamp());
+        };
+
+        producer.send(record, callback).get();
+
+    }
+
+    private static Properties properties(){
+        var properties = new Properties();
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.17.0.1:29092");
+        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        //properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
+        return properties;
+    }
+
+    @Override
+    public void close() {
+        producer.close();
+    }
+
+}
+
+
+
+==============================
+
+
+
+package conector;
+
+import conector.model.Pedido;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+public class Conector {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+
+        try (var producer = new KafkaProducerService<Pedido>()){
+
+            for(var i = 0; i < 10; i++){
+
+                var value = new BigDecimal(Math.random() * 5000 + 1);
+                var pedido = new Pedido(UUID.randomUUID().toString(), UUID.randomUUID().toString(), value);
+
+                producer.send("novo_pedido", pedido.getUserId(), pedido);
+            }
+        };
+
+    }
+
+}
+
+-----------------------
+package conector.model;
+
+import java.math.BigDecimal;
+
+public class Pedido {
+
+    private final String userId, orderId;
+    private final BigDecimal amount;
+
+    public Pedido(String userId, String orderId, BigDecimal amount){
+        this.userId = userId;
+        this.orderId = orderId;
+        this.amount = amount;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        orderId = orderId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        userId = userId;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount){
+        amount = amount;
+    }
+
+}
+
