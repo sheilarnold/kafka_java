@@ -7,11 +7,11 @@ public class Pedido {
     private final String userId, orderId, user_email;
     private final BigDecimal amount;
 
-    public Pedido(String userId, String orderId, BigDecimal amount, String user_email){
+    public Pedido(String userId, String orderId, String user_email, BigDecimal amount){
         this.userId = userId;
         this.orderId = orderId;
-        this.amount = amount;
         this.user_email = user_email;
+        this.amount = amount;
     }
 
     public String getOrderId() {
@@ -30,11 +30,11 @@ public class Pedido {
         userId = userId;
     }
 
-    public String getUser_email() {
+    public String getUserEmail() {
         return user_email;
     }
 
-    public void setUser_email(String user_email) {
+    public void setUserEmail(String user_email) {
         user_email = user_email;
     }
 

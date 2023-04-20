@@ -13,6 +13,7 @@
         <module>service-producer</module>
         <module>service-consumer</module>
         <module>service-log</module>
+        <module>service-user</module>
     </modules>
 
     <properties>

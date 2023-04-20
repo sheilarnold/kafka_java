@@ -24,13 +24,6 @@ public class Log {
             service.run();
         }
 
-        //var log = new Log();
-        //var kfkService = new KafkaService(Log.class.getSimpleName(),"novo_pedido", log::parse);
-        //kfkService.run();
-
-        //var consumer = new KafkaConsumer<String, String>(properties());
-       // consumer.subscribe(Pattern.compile(".*"));//.* determina que todos os tópicos serão observados
-
     }
 
     private void parse(ConsumerRecord<String, String> record) {

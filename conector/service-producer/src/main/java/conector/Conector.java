@@ -17,7 +17,7 @@ public class Conector {
                 var chave = UUID.randomUUID().toString();
                 var userId = UUID.randomUUID().toString();
                 var valor = new BigDecimal(Math.random() * 5000 + 1);
-                var ped = new Pedido(userId, chave, valor);
+                var ped = new Pedido(userId, chave, valor, Math.random() + "@email.com");
                 producer.send("novo_pedido", chave, ped);
             }
         };

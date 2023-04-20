@@ -10,6 +10,7 @@
         <module name="service-consumer" />
         <module name="service-log" />
         <module name="service-kafka" />
+        <module name="service-user" />
       </profile>
     </annotationProcessing>
   </component>
