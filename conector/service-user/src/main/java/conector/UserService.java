@@ -38,7 +38,7 @@ public class UserService {
 
         var pedido = record.value();
         if(isNewUser(pedido.getUserEmail())){
-            insert(pedido.getUserEmail());
+            insert(pedido.getUserId(), pedido.getUserEmail());
         }
 
     }
@@ -49,10 +49,10 @@ public class UserService {
         return !results.next();
     }
 
-    private void insert(String userEmail) throws SQLException {
+    private void insert(String id, String userEmail) throws SQLException {
         var insert = connection.prepareStatement("insert into Users (id, email) values (?, ?)");
-        insert.setString(1, "id");
-        insert.setString(1, userEmail);
+        insert.setString(1, id);
+        insert.setString(2, userEmail);
         insert.execute();
         System.out.println("Usuario adicionado: " + userEmail);
     }

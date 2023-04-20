@@ -7,13 +7,14 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class Log {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
 
         var logService = new Log();
         try (var service = new KafkaService(Log.class.getSimpleName(),
