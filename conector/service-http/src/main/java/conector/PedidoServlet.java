@@ -13,14 +13,31 @@ import java.util.concurrent.ExecutionException;
 
 public class PedidoServlet extends HttpServlet {
 
+    private final KafkaProducerService<Pedido> producer = new KafkaProducerService<>();
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        try {
+            producer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try (var producer = new KafkaProducerService<Pedido>()) {
+        try {
+            var email = req.getParameter("email");
             var chave = UUID.randomUUID().toString();
             var userId = UUID.randomUUID().toString();
-            var valor = new BigDecimal(Math.random() * 5000 + 1);
-            var ped = new Pedido(userId, chave, valor, Math.random() + "@email.com");
+            var valor = new BigDecimal(req.getParameter("valor"));
+            var ped = new Pedido(userId, chave, valor, email);
             producer.send("novo_pedido", chave, ped);
+
+            resp.getWriter().println("Pedido enviado");
+            resp.setStatus(HttpServletResponse.SC_OK);
+
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
